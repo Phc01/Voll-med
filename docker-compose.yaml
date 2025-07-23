@@ -1,0 +1,52 @@
+# Versão do Docker Compose
+version: '3.8'
+
+# Definição dos serviços (contêineres)
+services:
+  # Serviço para o banco de dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: mysql_db_vollmed
+    ports:
+      # Mapeia a porta 3306 do contêiner para a 3306 da sua máquina
+      - "3306:3306"
+    environment:
+      # Define as credenciais e o banco de dados inicial do MySQL
+      # ATENÇÃO: Troque 'root' e 'password' por senhas seguras em produção!
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: vollmed_api
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      # Garante que os dados do banco de dados persistam mesmo se o contêiner for removido
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Serviço para a sua API Spring Boot
+  api:
+    build: . # Constrói a imagem a partir do Dockerfile na pasta atual
+    container_name: vollmed_api_app
+    ports:
+      # Mapeia a porta 8080 do contêiner para a 8080 da sua máquina
+      - "8080:8080"
+    volumes:
+      - .:/app
+    environment:
+      # Passa as variáveis de ambiente para a aplicação Spring se conectar ao banco
+      # O host 'db' é o nome do serviço do MySQL definido acima.
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/vollmed_api?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      # Força o Spring a esperar pelo banco de dados (útil com JPA/Hibernate)
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      db:
+        condition: service_healthy # Garante que a API só inicie depois que o banco de dados estiver saudável
+
+# Define o volume nomeado para persistir os dados do banco
+volumes:
+  db_data:

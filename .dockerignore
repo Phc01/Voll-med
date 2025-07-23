@@ -1,0 +1,13 @@
+# Ignorar pastas de build do Maven e IDEs
+target/
+.idea/
+.vscode/
+*.iml
+
+# Ignorar logs e arquivos do sistema
+.DS_Store
+*.log
+
+# Ignorar o próprio Git
+.git
+.gitignore
