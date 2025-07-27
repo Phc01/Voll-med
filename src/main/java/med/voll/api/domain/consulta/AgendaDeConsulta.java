@@ -8,6 +8,7 @@ import med.voll.api.domain.paciente.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
 @Service
@@ -25,7 +26,7 @@ public class AgendaDeConsulta {
     @Autowired
     private List<ValidadorAgendamentoDeConsulta> validadores;
 
-    public void agendarConsulta(DadosAgendamentoConsulta dados) {
+    public DadosDetalhamentoConsulta agendarConsulta(DadosAgendamentoConsulta dados) {
         if (!pacienteRepository.existsById(dados.idPaciente())) {
             throw new ValidacaoException("Id do Paciente informado nao existe");
         }
@@ -38,9 +39,15 @@ public class AgendaDeConsulta {
         var paciente = pacienteRepository.getReferenceById(dados.idPaciente());
         var medico = escolherMedico(dados);
 
+        if (medico == null) {
+            throw new ValidacaoException("Nao existe medico disponivel nessa data");
+        }
+
         var consulta = new Consulta(null, medico, paciente, dados.data());
 
         consultaRepository.save(consulta);
+
+        return new DadosDetalhamentoConsulta(consulta);
     }
 
     private Medico escolherMedico(DadosAgendamentoConsulta dados) {
