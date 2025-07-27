@@ -24,8 +24,6 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println("CHAMDNO FILTRO");
-
         var tokenJWT = recuperarToken(request);
 
         if (tokenJWT != null) {
@@ -34,7 +32,6 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            System.out.println("LOGADO NA REQUISICAO");
         }
 
         filterChain.doFilter(request, response);
