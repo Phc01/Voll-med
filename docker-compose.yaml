@@ -43,6 +43,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: password
       # Força o Spring a esperar pelo banco de dados (útil com JPA/Hibernate)
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      # Ativa o perfil de produção do Spring
+      SPRING_PROFILES_ACTIVE: prod
     depends_on:
       db:
         condition: service_healthy # Garante que a API só inicie depois que o banco de dados estiver saudável
